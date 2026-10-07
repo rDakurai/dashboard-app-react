@@ -1,27 +1,42 @@
+import { useEffect, useState } from 'react';
 import type { Contact } from '../assets/types/contact';
+import { getContacts } from '../services/contactsService';
 import ContactRow from './ContactRow';
 
-const contacts: Contact[] = [
-  { id: 1, name: 'Maria Belén Jaramillo Arguello', email: 'niñasauceña@sauces.com' },
-  { id: 2, name: 'Juan Perez', email: 'juan@example.com' },
-  
-];
-
 function ContactList() {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getContacts()
+      .then((data) => setContacts(data))
+      .catch(() => setError('No se pudieron cargar los contactos'))
+      .finally(() => setCargando(false));
+  }, []);
+
+  if (cargando) {
+    return <p className="text-muted">Cargando contactos…</p>;
+  }
+
+  if (error) {
+    return <div className="alert alert-danger">{error}</div>;
+  }
+
   return (
     <table className="table table-striped table-sm">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            {contacts.map((contact) => (
-                <ContactRow key={contact.id} contact={contact} />
-            ))}
-        </tbody>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nombre</th>
+          <th scope="col">Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {contacts.map((contact) => (
+          <ContactRow key={contact.id} contact={contact} />
+        ))}
+      </tbody>
     </table>
   );
 }
